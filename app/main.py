@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, Header, HTTPException, Query
-from fastapi.responses import Response
+from fastapi.responses import RedirectResponse, Response
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from pydantic import BaseModel, Field
 
@@ -36,7 +36,19 @@ app = FastAPI(title="AI Engineering Lab — RAG Ops", version="1.0.0", lifespan=
 
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=1)
-    use_cache: bool | None = None
+    use_cache: bool | None = Field(
+        default=None,
+        description="Omit or true to use cache; false forces a full RAG miss (no read/write).",
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {"question": "What is TTFT?"},
+                {"question": "What commonly drives haze in Singapore?"},
+            ]
+        }
+    }
 
 
 class TimingsModel(BaseModel):
@@ -51,6 +63,7 @@ class TimingsModel(BaseModel):
 class AskResponse(BaseModel):
     answer: str
     cache: str
+    cache_enabled: bool
     doc_ids: list[str]
     chunk_ids: list[str]
     timings: TimingsModel
@@ -60,6 +73,11 @@ class AskResponse(BaseModel):
     prompt_version: str
     request_id: str
     semantic_similarity: float | None = None
+
+
+@app.get("/", include_in_schema=False)
+def root() -> RedirectResponse:
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
@@ -91,6 +109,7 @@ def ask(
     return AskResponse(
         answer=result.answer,
         cache=result.cache,
+        cache_enabled=result.cache_enabled,
         doc_ids=result.doc_ids,
         chunk_ids=result.chunk_ids,
         timings=TimingsModel(**result.timings.__dict__),

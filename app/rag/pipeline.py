@@ -36,6 +36,7 @@ class AskResult:
     prompt_version: str = ""
     request_id: str = ""
     semantic_similarity: float | None = None
+    cache_enabled: bool = True
     chunks: list[RetrievedChunk] = field(default_factory=list)
 
 
@@ -117,6 +118,7 @@ class RagPipeline:
                     model=model,
                     prompt_version=prompt_version,
                     request_id=trace.request_id,
+                    cache_enabled=cache_enabled,
                 )
         else:
             trace.end_span("cache_lookup", output={"result": "DISABLED"})
@@ -155,6 +157,7 @@ class RagPipeline:
                     prompt_version=prompt_version,
                     request_id=trace.request_id,
                     semantic_similarity=semantic_sim,
+                    cache_enabled=cache_enabled,
                 )
             try:
                 cache_span.end(output={"result": "MISS", "best_similarity": semantic_sim})
@@ -240,5 +243,6 @@ class RagPipeline:
             prompt_version=prompt_version,
             request_id=trace.request_id,
             semantic_similarity=semantic_sim,
+            cache_enabled=cache_enabled,
             chunks=chunks,
         )
