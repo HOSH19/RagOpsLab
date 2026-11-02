@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-eng-lab"
+version = "1.0.0"
+description = "AI Engineering Lab — RAG Ops (evals, tracing, monitoring, latency, caching)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.32.0",
+  "openai>=1.55.0",
+  "chromadb>=0.5.20",
+  "redis>=5.2.0",
+  "prometheus-client>=0.21.0",
+  "langfuse>=2.57.0,<3",
+  "pydantic>=2.10.0",
+  "pydantic-settings>=2.6.0",
+  "python-dotenv>=1.0.1",
+  "httpx>=0.28.0",
+  "numpy>=2.1.0",
+]
+
+[project.scripts]
+rag-lab = "app.main:run"
+
+[tool.setuptools.packages.find]
+include = ["app*", "evals*"]

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RagOpsLab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Source+Sans+3:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <header class="top">
+        <div>
+          <p class="brand">RagOpsLab</p>
+          <h1>Ask the corpus. Watch the ops.</h1>
+          <p class="lede">
+            A local RAG lab for caching, latency, tracing, monitoring, and evals —
+            not a chat product.
+          </p>
+        </div>
+        <nav class="ext-links" aria-label="Ops tools">
+          <a href="http://localhost:3000" target="_blank" rel="noopener">Langfuse</a>
+          <a href="http://localhost:3001" target="_blank" rel="noopener">Grafana</a>
+          <a href="http://localhost:9090" target="_blank" rel="noopener">Prometheus</a>
+          <a href="/docs" target="_blank" rel="noopener">API docs</a>
+        </nav>
+      </header>
+
+      <main class="layout">
+        <section class="workspace" aria-label="Ask">
+          <form id="ask-form" class="ask-form">
+            <label class="field-label" for="question">Question</label>
+            <textarea
+              id="question"
+              name="question"
+              rows="3"
+              placeholder="e.g. What is TTFT?"
+              required
+            ></textarea>
+
+            <div class="ask-row">
+              <label class="toggle">
+                <input type="checkbox" id="use-cache" checked />
+                <span>Use cache</span>
+              </label>
+              <button type="submit" id="ask-btn">Ask</button>
+            </div>
+
+            <div class="examples" aria-label="Example questions">
+              <button type="button" class="chip" data-q="What is TTFT?">What is TTFT?</button>
+              <button type="button" class="chip" data-q="What commonly drives haze in Singapore?">
+                Haze in Singapore
+              </button>
+              <button type="button" class="chip" data-q="How does exact cache differ from semantic cache?">
+                Exact vs semantic cache
+              </button>
+              <button type="button" class="chip" data-q="What should a golden eval set include?">
+                Golden eval set
+              </button>
+            </div>
+          </form>
+
+          <div id="status" class="status" hidden></div>
+
+          <article id="result" class="result" hidden>
+            <div class="result-head">
+              <span id="cache-badge" class="cache-badge">MISS</span>
+              <span id="cache-detail" class="cache-detail"></span>
+            </div>
+
+            <h2 class="answer-label">Answer</h2>
+            <p id="answer" class="answer"></p>
+
+            <div class="timings" id="timings" aria-label="Stage timings"></div>
+
+            <div class="docs-block">
+              <h3>Retrieved docs</h3>
+              <div id="docs" class="docs"></div>
+            </div>
+
+            <p id="meta" class="meta"></p>
+
+            <details class="raw">
+              <summary>Show raw JSON</summary>
+              <pre id="raw-json"></pre>
+            </details>
+          </article>
+        </section>
+
+        <aside class="guide" aria-label="Learning guide">
+          <h2>What you’re learning</h2>
+          <p id="hint" class="hint">
+            Ask a question to start. The pillars below update based on what you just saw.
+          </p>
+
+          <ol class="pillars">
+            <li data-pillar="caching">
+              <strong>Caching</strong>
+              <span>Ask the same question twice. Second call should be <code>HIT</code> (~ms). Toggle cache off to force a full path.</span>
+            </li>
+            <li data-pillar="latency">
+              <strong>Latency</strong>
+              <span>Read the stage strip: embed → retrieve → TTFT → e2e. On a hit, only cache/e2e matter.</span>
+            </li>
+            <li data-pillar="tracing">
+              <strong>Tracing</strong>
+              <span>Open <a href="http://localhost:3000" target="_blank" rel="noopener">Langfuse</a> and find the span tree for this <code>request_id</code>.</span>
+            </li>
+            <li data-pillar="monitoring">
+              <strong>Monitoring</strong>
+              <span>Watch <a href="http://localhost:3001" target="_blank" rel="noopener">Grafana</a> after a few asks — cache ratio, e2e, errors. Raw: <a href="/metrics">/metrics</a>.</span>
+            </li>
+            <li data-pillar="evals">
+              <strong>Evals</strong>
+              <span>Quality isn’t latency. Run <code>python -m evals.run_evals --no-cache</code> for Hit@k / judge scores.</span>
+            </li>
+          </ol>
+        </aside>
+      </main>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>
