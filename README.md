@@ -2,6 +2,58 @@
 
 Local lab for **RAG ops**: caching, latency, tracing, monitoring, and evals — not a chat demo.
 
+## What you'll see
+
+Run one ask in the lab UI, then follow the same request through traces and metrics — deeper explainers live in [`notes/`](notes/).
+
+**Lab UI** ([caching](notes/05_caching.md) · [latency](notes/04_latency.md) · [RAG](notes/06_rag.md)) — cache outcome, stage timings, retrieved docs:
+
+![Lab UI](docs/images/lab-ui.png)
+
+**Langfuse** ([tracing](notes/02_tracing.md)) — cost, tokens, and per-request span trees:
+
+![Langfuse overview](docs/images/langfuse.png)
+
+**Grafana** ([monitoring](notes/03_monitoring.md) · [latency](notes/04_latency.md)) — e2e / stage p95 and cache hit ratio (**RAG Ops Lab** dashboard):
+
+![Grafana RAG Ops Lab](docs/images/grafana.png)
+
+Concept notes: [evals](notes/01_evals.md) · [tracing](notes/02_tracing.md) · [monitoring](notes/03_monitoring.md) · [latency](notes/04_latency.md) · [caching](notes/05_caching.md) · [RAG](notes/06_rag.md)
+
+## Localhost map
+
+| Service | URL | Notes |
+|---------|-----|--------|
+| **Lab UI** | http://localhost:8000 | Ask + timings + learning guide |
+| API docs | http://localhost:8000/docs | Swagger |
+| Metrics | http://localhost:8000/metrics | Prometheus scrape target |
+| **Langfuse** | http://localhost:3000 | Traces / span trees |
+| **Grafana** | http://localhost:3001 | `admin` / `admin` → Dashboards → **RAG** → **RAG Ops Lab** |
+| Prometheus | http://localhost:9090 | Raw metrics |
+| Redis | redis://localhost:6379 | Exact + semantic cache |
+| Chroma | http://localhost:8001 | Vector store (Docker) |
+
+## Quick start
+
+```bash
+docker compose up -d
+
+python -m venv .venv
+# Windows: .\.venv\Scripts\Activate.ps1
+# macOS/Linux: source .venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.example .env
+# set OPENAI_API_KEY
+# Langfuse: open :3000 → sign up → project → Settings → API Keys → paste into .env
+
+set PYTHONPATH=.          # Windows PowerShell: $env:PYTHONPATH = "."
+python -m app.rag.ingest  # embeds corpus into Chroma
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+Open http://localhost:8000 — or `curl` `/ask` if you prefer the API.
+
 ## Architecture
 
 ```mermaid
@@ -43,56 +95,6 @@ sequenceDiagram
   A->>F: spans cache/embed/retrieve/generate
 ```
 
-## Localhost map
-
-| Service | URL | Notes |
-|---------|-----|--------|
-| **Lab UI** | http://localhost:8000 | Ask + timings + learning guide |
-| API docs | http://localhost:8000/docs | Swagger |
-| Metrics | http://localhost:8000/metrics | Prometheus scrape target |
-| **Langfuse** | http://localhost:3000 | Traces / span trees |
-| **Grafana** | http://localhost:3001 | `admin` / `admin` → Dashboards → **RAG** → **RAG Ops Lab** |
-| Prometheus | http://localhost:9090 | Raw metrics |
-| Redis | `localhost:6379` | Exact + semantic cache |
-| Chroma | `localhost:8001` | Vector store (Docker) |
-
-## Screenshots
-
-**Lab UI** — answer, cache badge, stage timings, retrieved docs:
-
-![Lab UI](docs/images/lab-ui.png)
-
-**Langfuse** — overview + per-request span tree (`cache_lookup` → `embed` → `retrieve` → `generate`):
-
-![Langfuse overview](docs/images/langfuse.png)
-
-![Langfuse span tree](docs/images/langfuse-span-tree.png)
-
-**Grafana** — e2e / stage latency, cache hit ratio:
-
-![Grafana RAG Ops Lab](docs/images/grafana.png)
-
-## Quick start
-
-```bash
-docker compose up -d
-
-python -m venv .venv
-# Windows: .\.venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-
-cp .env.example .env
-# set OPENAI_API_KEY
-# Langfuse: open :3000 → sign up → project → Settings → API Keys → paste into .env
-
-set PYTHONPATH=.          # Windows PowerShell: $env:PYTHONPATH = "."
-python -m app.rag.ingest  # embeds corpus into Chroma
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-Open http://localhost:8000 — or `curl` `/ask` if you prefer the API.
-
 ## Learning loops
 
 | Topic | Try this |
@@ -111,6 +113,7 @@ app/static/    Lab UI
 corpus/        Markdown knowledge base
 evals/         Golden set + judges
 grafana/       Provisioned RAG Ops Lab dashboard
+notes/         Concept explainers
 scripts/       Latency bench
 ```
 
